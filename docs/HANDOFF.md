@@ -1,24 +1,29 @@
 # HANDOFF — azure-triage-agent
 
-Last updated: 2026-09-13 (Slice 02 build complete) · Next awaited: agy verdict for Slice 02, then Slice 03
+Last updated: 2026-09-13 (PROJECT COMPLETE — 3/3 slices, all agy-validated) · Next: optional GitHub publish (needs Mike YES) or real-Azure validation slice
 
 ## Current State
-- SDD+DOX project at ~/projects/azure-triage-agent (not a GitHub repo — local only, per Mike's workflow; publish policy applies if ever shared).
-- **Slice 01 DONE** (commits `0eed6cd`, `c6b505f`): schemas/config/main shell/bicep; agy PASS-WITH-CONCERNS; F-01 fixed (`cpu: json('0.5')`), F-02/F-03 queued.
-- **Slice 02 built + committed** (`6c525e2`): `src/services/triage_service.py` (Azure OpenAI structured outputs, temp 0.0, DI client, flat strict schema), `src/services/__init__.py` (managed-identity prod client, mock client), F-02 whitespace validator fix, aimock harness (`aimock/` + e2e tests).
-  - Gates: ALL_GATES_PASS (30 tests, 100% cov), MECH_PASS, DOX_PASS.
-  - **agy validation RUNNING** → will write `docs/validation/slice-02-agy.md`; process its findings before Slice 03.
-- **Slice 03 (next)**: `src/services/search_service.py` (Azure AI Search hybrid, fake adapter offline), wire service+search into main.py (200 TriageResult), e2e API test, F-03 field ceilings, aimock search/MCP/A2A mocks.
+- SDD+DOX project at ~/projects/azure-triage-agent (local git; no GitHub repo — publish policy applies if ever shared).
+- **ALL SLICES DONE + agy-validated:**
+  - Slice 01 (`0eed6cd`, `c6b505f`): schemas/config/main shell/bicep — agy PASS-WITH-CONCERNS; F-01 fixed.
+  - Slice 02 (`6c525e2`, `5d84381`): classification engine — agy PASS; F-01 (choices guard) fixed.
+  - Slice 03 (`50c3772`, final close-out commit to come): search + full pipeline + MCP mocks — agy **PASS, ready per PRD Success Criteria**; F-01 dedup fixed.
+- Gates today: ALL_GATES_PASS (47 tests, 100% cov, `--cov-fail-under=85`), MECH_PASS, DOX_PASS (8 children).
+- PRD Success Criteria 1-5 satisfied against mocks; real Azure validation remains (no creds by design).
 
 ## Environment Notes
-- WSL2, no sudo → bicep standalone `~/.local/bin/bicep` (G3 = `bicep build infra/main.bicep`); `az` CLI NOT installed.
-- `uv sync` deps; `PATH="$PWD/.venv/bin:$PATH" ./scripts/sdd-validate .` required (kit script prefers global pytest, which lacks pytest-cov).
-- aimock 1.39.0 global. Fixture paths in `aimock/aimock.json` resolve against **repo root** (process CWD): `./aimock/fixtures/llm`.
-- Secrets gate: only `api_key="mock"` allowed (documented exception, mock client only).
-- Background agy runs via terminal backend can look stalled ("Fixing project permissions...") — check `/tmp/agy-slice0X-out.txt` / process poll.
-- Always run agy validators from `/tmp` with `--add-dir` pointing at the project (WSL sudo-hang pitfall), `--model "Gemini 3.8 Flash (High)"`.
+- WSL2 no sudo: bicep standalone; `az` absent (G3 = `bicep build`).
+- `PATH="$PWD/.venv/bin:$PATH" ./scripts/sdd-validate .` (kit prefers global pytest; needs venv pytest-cov).
+- aimock 1.39.0; config fixture paths relative to repo root; MCP notification REQUIRES `mcp-session-id` header.
+- Secrets gate: only `api_key="mock"` allowed (documented).
+- agy validators: run from `/tmp` + `--add-dir`, `--model "Gemini 3.8 Flash (High)"`, fresh session per slice (validator ≠ builder).
+- Background agy runs can appear stalled ("Fixing project permissions...") — check `/tmp/agy-slice0X-out.txt`.
+
+## Mocking map (no Azure needed)
+- Azure OpenAI → aimock fixtures (success/billing/mfa/fallback + 429 chaos).
+- MCP agentic surface → aimock mcp stanza + verified handshake test.
+- Azure AI Search → FakeSearchService (offline); real SDK path unit-tested with recording fake client.
+- A2A stanza = same pattern, not yet used.
 
 ## Risks
-- Real Azure OpenAI/Search untested by design (no creds) — mock-backed until a real-cloud validation gate.
-- DOX: `aimock/AGENTS.md` registered in root index (child AGENTS chain complete).
-- Validator isolation: never reuse builder context for agy; fresh session each slice.
+- Real Azure (managed identity token exchange, content filter, search semantic config, latency) untested — no creds; mock contract proven, real-cloud gate is a future slice.

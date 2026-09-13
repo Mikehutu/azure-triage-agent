@@ -87,12 +87,12 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 - [x] G5: e2e Triage API test passes (standard + critical fixtures)
 - [x] G4 coverage >= 85% for full suite; G1/G2/G3 green
 - [x] aimock chaos: 500s / malformed / mid-stream drops caught
-- [ ] agy AC verification → `docs/validation/slice-03.md`
+- [x] agy AC verification → `docs/validation/slice-03.md` (PASS — ready per PRD Success Criteria; F-01 dedup fixed)
 
 **Module Checkpoint:**
-- [ ] Full suite green with recorded evidence
-- [ ] End-to-end latency measured (report actual ms)
-- [ ] Cross-agent validation passed (agy)
+- [x] Full suite green with recorded evidence
+- [x] End-to-end latency measured (report actual ms)
+- [x] Cross-agent validation passed (agy)
 
 ---
 

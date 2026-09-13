@@ -34,3 +34,4 @@ uv run uvicorn src.main:app --port 8000  # run API (mock mode)
 
 ## Development rules
 Follow `AGENTS.md`. One slice at a time. Validate before the next slice. Validator (agy) ≠ builder, always. No real cloud credentials in code, env docs, or commits.
+- Tip: for single-file test runs use `--no-cov` (global addopts enforces >=85% only for the full suite).

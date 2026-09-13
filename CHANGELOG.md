@@ -23,3 +23,5 @@
 - [slice-03][fix]: agy F-03 — `max_length` 64/200/20_000 (ticket_id/subject/body) with 422 tests
 - [slice-03][test]: 46 tests / 100% cov — pipeline e2e (aimock LLM + fake search, <3s asserted), search unit, MCP handshake e2e, fail-loud 502 paths
 - [slice-03][harness]: aimock MCP stanza (`get_runbook_notes`) + verified handshake sequence (session-id header required for notifications/initialized); search mocked via FakeSearchService (no Azure Search REST in aimock)
+- [slice-03][validate]: agy verdict **PASS** — project "ready to be declared DONE per PRD Success Criteria" (6/6 ACs; probes incl. runbook collision, MCP fault injection, 5.7ms latency); INFO F-01 dedup FIXED (47 tests); F-02 defers rate limiting to gateway
+- [final]: 3/3 slices delivered, 3 isolated agy validations (1×PASS-WITH-CONCERNS→fixes, 2×PASS), GitHub publish not done (local only, per publish policy)

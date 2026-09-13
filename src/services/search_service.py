@@ -58,10 +58,15 @@ class AzureAISearchService:
                 select=["document_id", "title"],
             )
             refs: list[RunbookReference] = []
+            seen: set[str] = set()
             for item in results:
+                document_id = str(item["document_id"])
+                if document_id in seen:
+                    continue  # chunked indexes can emit duplicates (agy F-01)
+                seen.add(document_id)
                 refs.append(
                     RunbookReference(
-                        document_id=str(item["document_id"]),
+                        document_id=document_id,
                         title=str(item["title"]),
                         relevance_score=float(item.get("@search.score", 0.0)),
                     )

@@ -14,6 +14,12 @@ Date: 2026-09-13 · Builder: project session (Hermes) · Validator: agy (separat
 | AC-5 | agentic surfaces mocked: MCP handshake over real HTTP (initialize → session id → initialized → tools/list → tools/call) | VERIFIED | `tests/unit/test_aimock_mcp.py`; `aimock/aimock.json` mcp stanza (serverInfo/tools/get_runbook_notes) |
 | AC-6 | Gates: G1 ruff, G2 mypy --strict, G3 bicep, G4 >=85% cov (now enforced via `--cov-fail-under=85`) + secrets scan | VERIFIED | `run-gates.sh` → ALL_GATES_PASS (46 tests, 100% coverage); `sdd-validate` MECH_PASS; DOX_PASS |
 
+## Validator verdict (agy, clean-room, artifacts-only)
+**PASS — "project ready to be declared DONE per PRD Success Criteria"** (report: `slice-03-agy.md`, eval commit `50c3772`). All 6 ACs VERIFIED; zero MAJOR/MINOR findings.
+- Probes: hallucinated-runbook collision (LLM runbooks excluded/replaced by search — verified live), duplicate doc IDs, missing `@search.score` → 0.0, missing fields → KeyError → SearchServiceError → 502, secrets scan (1 documented mock exception), content-type/malformed payloads → 422, MCP fault injection (no session header → 400; unknown tool → JSON-RPC -32602), **latency 5.7ms avg** (vs <3s PRD), DOX all 8 children PASS.
+- INFO findings: F-01 duplicate document_ids → **FIXED** (dedup, `test_duplicate_document_ids_deduped`; 47 tests, 100% cov). F-02 no app-level rate limiting → deferred to gateway (Azure Front Door/APIM). F-03 single-file `--cov-fail-under` → README tip (`--no-cov`). F-04 no `infra/AGENTS.md` → accepted (root AGENTS owns Bicep/G3).
+- Confidence note: live-managed-identity token exchange, content filter, semantic search config, and real latency require a real Azure tenant — mocked contract proven; real-cloud validation is a future step.
+
 ## Key decisions / notes
 - **Mocking split (explicit):** azure-search-documents is NOT aimed at aimock (no Azure Search REST support) → deterministic **`FakeSearchService`** adapter for offline API tests; `AzureAISearchService` (real SDK, DI) for prod, unit-tested via a recording fake client. aimock covers **LLM + MCP**; A2A stanza mountable the same way (pattern documented in `aimock/README.md`).
 - **Fail-loud at the edge:** provider errors → HTTP **502** (never a fabricated TriageResult); unoverridden (no config) endpoint also returns 502, tested.

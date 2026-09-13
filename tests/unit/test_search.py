@@ -54,6 +54,18 @@ def test_maps_documents_and_scores() -> None:
     assert call["select"] == ["document_id", "title"]
 
 
+def test_duplicate_document_ids_deduped() -> None:
+    client = RecordingClient(
+        [
+            {"document_id": "rb-1", "title": "First", "@search.score": 0.9},
+            {"document_id": "rb-1", "title": "Duplicate chunk", "@search.score": 0.5},
+            {"document_id": "rb-2", "title": "Second", "@search.score": 0.4},
+        ]
+    )
+    refs = AzureAISearchService(client, "idx").search_runbooks("q")
+    assert [r.document_id for r in refs] == ["rb-1", "rb-2"]
+
+
 def test_no_matches_returns_empty() -> None:
     refs = AzureAISearchService(RecordingClient([]), "idx").search_runbooks("nonsense query")
     assert refs == []

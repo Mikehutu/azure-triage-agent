@@ -34,6 +34,8 @@ include = ["src*"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Validator-generated reports (agy) are machine-written artifacts — not linted.
+exclude = ["docs/validation/slice-*-agy.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
