@@ -131,6 +131,8 @@ class AzureOpenAITriageService:
         except Exception as exc:
             raise TriageServiceError(f"classification request failed: {exc}") from exc
 
+        if not completion.choices:
+            raise TriageServiceError("classification returned no choices")
         content = completion.choices[0].message.content
         if not content:
             raise TriageServiceError("classification returned empty content")

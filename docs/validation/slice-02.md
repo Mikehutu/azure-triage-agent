@@ -13,6 +13,12 @@ Date: 2026-09-13 · Builder: project session (Hermes) · Validator: agy (separat
 | AC-4 | standard + critical test fixtures defined | VERIFIED | `tests/fixtures/tickets.json`, parametrized fixture test |
 | AC-5 | Gates: G1 ruff, G2 mypy --strict, G3 bicep, G4 >=85% coverage, secrets scan | VERIFIED | `scripts/run-gates.sh` → ALL_GATES_PASS; 30 passed, 100% coverage (104 stmts); `sdd-validate` MECH_PASS; DOX_PASS |
 
+## Validator verdict (agy, clean-room, artifacts-only)
+**PASS** — all 5 ACs VERIFIED, zero MAJOR/MINOR findings (report: `slice-02-agy.md`, eval commit `6c525e2`).
+- Probes all PASS: DI network isolation (poisoned socket), schema strictness (no $defs/$ref, additionalProperties everywhere), temperature/messages/response_format correctness, markdown-fence content fails loud, secret scan (only `api_key="mock"`), manual aimock e2e on port 4099.
+- INFO findings: F-01 unguarded `choices[0]` → FIXED (guard + `test_no_choices_raises`, 31 tests pass). F-02 mock-key whitelist → accepted (documented). F-03 unbounded fields → Slice 03 (scheduled).
+- Confidence note: live IMDS token exchange + real content-filter behavior unverifiable without Azure — code raises `TriageServiceError` on null content either way.
+
 ## Key design decisions
 - **Dependency injection for the Azure OpenAI client**: `AzureOpenAITriageService(client, deployment)` — unit tests inject a recording stub; e2e injects a real `AzureOpenAI` pointed at aimock. No production code path is duplicated for tests.
 - **Flat strict JSON schema** (no `$ref`/`$defs`), every object `additionalProperties: false` — Azure OpenAI json_schema mode safe, verified by assertion.

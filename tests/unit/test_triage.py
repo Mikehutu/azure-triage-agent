@@ -30,7 +30,10 @@ VALID_JSON = json.dumps(
 
 
 def _recording_client(
-    content: str | None = None, *, error: Exception | None = None
+    content: str | None = None,
+    *,
+    error: Exception | None = None,
+    choices: Any | None = None,
 ) -> tuple[Any, dict[str, Any]]:
     seen: dict[str, Any] = {}
 
@@ -38,7 +41,11 @@ def _recording_client(
         seen.update(kwargs)
         if error is not None:
             raise error
-        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
+        return SimpleNamespace(
+            choices=choices
+            if choices is not None
+            else [SimpleNamespace(message=SimpleNamespace(content=content))]
+        )
 
     client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=_create)))
     return client, seen
@@ -106,6 +113,12 @@ def test_out_of_enum_value_raises() -> None:
 def test_empty_content_raises() -> None:
     client, _ = _recording_client(None)
     with pytest.raises(TriageServiceError):
+        AzureOpenAITriageService(client, "gpt-4o-mini").classify(PAYLOAD)
+
+
+def test_no_choices_raises() -> None:
+    client, _ = _recording_client(choices=[])
+    with pytest.raises(TriageServiceError, match="no choices"):
         AzureOpenAITriageService(client, "gpt-4o-mini").classify(PAYLOAD)
 
 

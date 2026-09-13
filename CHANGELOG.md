@@ -18,3 +18,4 @@
 - [slice-02][fix]: agy F-02 — whitespace-only body/subject rejected (field_validator)
 - [slice-02][test]: 30 tests / 100% cov; unit (mocked client incl. 429/malformed/mismatch) + aimock e2e (real HTTP: billing fixture + throttle 429 → TriageServiceError, fail loud)
 - [slice-02][harness]: `aimock/` — Azure OpenAI mocks (billing, mfa, fallback, 429 error), AGENTS.md registered in DOX index; secrets gate allows ONLY `api_key="mock"` (documented)
+- [slice-02][validate]: agy verdict **PASS** (5/5 AC VERIFIED, 0 MAJOR/MINOR; probes: DI isolation, schema strictness, fences, secret scan); INFO F-01 choices guard FIXED (31 tests); F-03 → slice 03

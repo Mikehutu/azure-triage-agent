@@ -56,12 +56,12 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 - [x] G4: `pytest tests/unit/ -v` with >= 85% coverage
 - [x] G1/G2 re-run
 - [x] aimock e2e: scripted Azure OpenAI responses over real HTTP (record/replay or fixtures)
-- [ ] agy AC verification → `docs/validation/slice-02.md`
+- [x] agy AC verification → `docs/validation/slice-02.md` (PASS; INFO F-01 choices guard fixed)
 
 **Module Checkpoint:**
-- [ ] All tests pass, >= 85% coverage
-- [ ] aimock-mocked edge cases caught (throttle 429, malformed JSON, empty content)
-- [ ] Cross-agent validation passed (agy)
+- [x] All tests pass, >= 85% coverage
+- [x] aimock-mocked edge cases caught (throttle 429, malformed JSON, empty content, no choices)
+- [x] Cross-agent validation passed (agy)
 
 ---
 
