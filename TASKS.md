@@ -70,23 +70,23 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 ### Module: `search-service` + API e2e
 
 #### Plan (Agent: builder)
-- [ ] AC: `ISearchService.search_runbooks(query, top=2)` returns up to 2 `RunbookReference` (id, title, relevance_score); empty list on no match
-- [ ] AC: hybrid search against `kb-runbooks-index` (Azure AI Search SDK); failures surface, no silent fallback
-- [ ] AC: `POST /api/v1/triage` end-to-end enriches in < 3s (G5) — measured against mocked search + LLM
-- [ ] AC (agy F-03): unbounded fields — `max_length` on ticket_id/subject/body + API payload ceiling
-- [ ] Edge cases: empty runbook match, search index unavailable, degraded suggestion, oversized payload
+- [x] AC: `ISearchService.search_runbooks(query, top=2)` returns up to 2 `RunbookReference` (id, title, relevance_score); empty list on no match
+- [x] AC: hybrid search against `kb-runbooks-index` (Azure AI Search SDK); failures surface, no silent fallback
+- [x] AC: `POST /api/v1/triage` end-to-end enriches in < 3s (G5) — measured against mocked search + LLM
+- [x] AC (agy F-03): unbounded fields — `max_length` on ticket_id/subject/body + API payload ceiling
+- [x] Edge cases: empty runbook match, search index unavailable, degraded suggestion, oversized payload
 
 #### Implement (Agent: builder)
-- [ ] `src/services/search_service.py` (Azure SDK hybrid search; local fake adapter for offline tests)
-- [ ] `tests/unit/test_search.py` (mocked client / fake adapter)
-- [ ] Wire `triage_service` + `search_service` into `src/main.py` POST handler (200 TriageResult)
-- [ ] `tests/unit/test_triage_api.py` e2e (FastAPI TestClient + aimock LLM + fake search)
-- [ ] `aimock/` fixtures for search + any MCP/A2A agentic surfaces
+- [x] `src/services/search_service.py` (Azure SDK hybrid search; local fake adapter for offline tests)
+- [x] `tests/unit/test_search.py` (mocked client / fake adapter)
+- [x] Wire `triage_service` + `search_service` into `src/main.py` POST handler (200 TriageResult)
+- [x] `tests/unit/test_triage_api.py` e2e (FastAPI TestClient + aimock LLM + fake search)
+- [x] `aimock/` fixtures for search + any MCP/A2A agentic surfaces (MCP stanza + handshake test; search via FakeSearchService)
 
 #### Validate (Agent: **agy**)
-- [ ] G5: e2e Triage API test passes (standard + critical fixtures)
-- [ ] G4 coverage >= 85% for full suite; G1/G2/G3 green
-- [ ] aimock chaos: 500s / malformed / mid-stream drops caught
+- [x] G5: e2e Triage API test passes (standard + critical fixtures)
+- [x] G4 coverage >= 85% for full suite; G1/G2/G3 green
+- [x] aimock chaos: 500s / malformed / mid-stream drops caught
 - [ ] agy AC verification → `docs/validation/slice-03.md`
 
 **Module Checkpoint:**

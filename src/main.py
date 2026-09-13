@@ -1,16 +1,18 @@
 """FastAPI application for the enterprise ticket triage & enrichment agent.
 
-Slice 01: API surface shell + validation contract. Service wiring lands in
-slice 02 (Azure OpenAI classification) and slice 03 (Azure AI Search runbook
-retrieval). Until then, valid payloads respond 501 (fail loud, never fake a
-triage result).
+Slice 03: full pipeline wired — validation (FR-1) → classification (FR-2) →
+runbook retrieval (FR-3) → enriched TriageResult. Provider failures surface as
+HTTP 502 (fail loud, never a fake/enriched fallback).
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 
 from src.schemas import TicketPayload, TriageResult
+from src.services import SearchServiceError, get_search_service, get_triage_service
+from src.services.search_service import ISearchService
+from src.services.triage_service import ITriageService, TriageServiceError
 
-app = FastAPI(title="azure-triage-agent", version="0.1.0")
+app = FastAPI(title="azure-triage-agent", version="0.2.0")
 
 
 @app.get("/healthz")
@@ -24,13 +26,20 @@ def healthz() -> dict[str, str]:
     response_model=TriageResult,
     responses={
         422: {"description": "Validation error"},
-        501: {"description": "Triage pipeline not wired (slice 02+)"},
+        502: {"description": "Triage pipeline provider error (OpenAI/Search)"},
     },
 )
-def triage(payload: TicketPayload) -> TriageResult:
-    """Validate a ticket payload (FR-1).
-
-    Returns HTTP 422 with field-level detail on invalid payloads. Validation is
-    schema-enforced before any service code runs.
-    """
-    raise HTTPException(status_code=501, detail="triage pipeline not wired yet (slice 02)")
+def triage(
+    payload: TicketPayload,
+    triage_svc: ITriageService = Depends(get_triage_service),
+    search_svc: ISearchService = Depends(get_search_service),
+) -> TriageResult:
+    """Validate, classify, and enrich a ticket payload (FR-1 / FR-2 / FR-3)."""
+    try:
+        result = triage_svc.classify(payload)
+        runbooks = search_svc.search_runbooks(f"{payload.subject}\n{payload.body}", top=2)
+        return TriageResult(
+            **result.model_dump(exclude={"matched_runbooks"}), matched_runbooks=runbooks
+        )
+    except (TriageServiceError, SearchServiceError) as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc

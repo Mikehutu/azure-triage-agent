@@ -19,3 +19,7 @@
 - [slice-02][test]: 30 tests / 100% cov; unit (mocked client incl. 429/malformed/mismatch) + aimock e2e (real HTTP: billing fixture + throttle 429 → TriageServiceError, fail loud)
 - [slice-02][harness]: `aimock/` — Azure OpenAI mocks (billing, mfa, fallback, 429 error), AGENTS.md registered in DOX index; secrets gate allows ONLY `api_key="mock"` (documented)
 - [slice-02][validate]: agy verdict **PASS** (5/5 AC VERIFIED, 0 MAJOR/MINOR; probes: DI isolation, schema strictness, fences, secret scan); INFO F-01 choices guard FIXED (31 tests); F-03 → slice 03
+- [slice-03]: search + full pipeline — `src/services/search_service.py` (Azure AI Search hybrid, fail-loud `SearchServiceError`, `FakeSearchService` offline adapter), `src/main.py` wired (200 `TriageResult`; provider errors → 502, no fake results)
+- [slice-03][fix]: agy F-03 — `max_length` 64/200/20_000 (ticket_id/subject/body) with 422 tests
+- [slice-03][test]: 46 tests / 100% cov — pipeline e2e (aimock LLM + fake search, <3s asserted), search unit, MCP handshake e2e, fail-loud 502 paths
+- [slice-03][harness]: aimock MCP stanza (`get_runbook_notes`) + verified handshake sequence (session-id header required for notifications/initialized); search mocked via FakeSearchService (no Azure Search REST in aimock)

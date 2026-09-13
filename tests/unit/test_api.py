@@ -43,8 +43,8 @@ def test_extra_field_returns_422() -> None:
     assert resp.status_code == 422
 
 
-def test_valid_payload_interim_501_until_wiring() -> None:
-    """Slice 01: valid payloads are accepted by the schema but the triage
-    pipeline is not wired yet -> 501 (fail loud, no fake result)."""
+def test_valid_payload_fails_loud_502_without_wiring() -> None:
+    """Slice 03: without dependency overrides (real services) the endpoint must
+    NOT fake a result — provider errors surface as HTTP 502 (fail loud)."""
     resp = client.post("/api/v1/triage", json=VALID)
-    assert resp.status_code == 501
+    assert resp.status_code == 502

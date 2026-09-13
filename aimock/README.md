@@ -20,7 +20,14 @@ curl http://127.0.0.1:4010/openai/deployments/gpt-4o-mini/chat/completions \
 - `userMessage` matches the last user message (substring by default).
 - Fixture paths in `aimock.json` resolve against **process CWD** (project root), not the config dir.
 - `error` fixtures (e.g. 429) exercise fail-loud paths: our service must raise, never fall back.
+- **MCP mock**: `mcp` stanza mounts JSON-RPC on the same port (`POST /mcp`). Handshake order (verified): `initialize` (server issues `Mcp-Session-Id` header) → `notifications/initialized` **with `mcp-session-id` header** (202) → `tools/list` / `tools/call` with that header.
+- **A2A/vector stanzas** mount the same way (see aimock `fixtures/examples/`); not used yet — pattern ready.
 - Never commit real keys; dummy `api-key: mock` only. See skill `ai-mock-testing` for chaos/record-replay.
+
+## What is mocked where (Slice 03 split)
+- Azure OpenAI chat → **aimock** (`fixtures/llm/chat.json`, azure provider).
+- Agentic surface (MCP tool) → **aimock** (`mcp` stanza, verified handshake test).
+- Azure AI Search → **in-process `FakeSearchService`** (aimock has no Azure Search REST support). Real SDK path unit-tested with a recording fake client.
 
 ## Verification
 

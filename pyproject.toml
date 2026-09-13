@@ -38,6 +38,11 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 
+# FastAPI requires Depends(...) in argument defaults (idiomatic, B008 is a false
+# positive for FastAPI routes).
+[tool.ruff.lint.per-file-ignores]
+"src/main.py" = ["B008"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
@@ -46,7 +51,7 @@ files = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-q --cov=src --cov-report=term-missing"
+addopts = "-q --cov=src --cov-report=term-missing --cov-fail-under=85"
 
 [tool.coverage.run]
 source = ["src"]

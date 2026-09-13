@@ -2,5 +2,27 @@
   "llm": {
     "provider": "azure",
     "fixtures": "./aimock/fixtures/llm"
+  },
+  "mcp": {
+    "serverInfo": {
+      "name": "triage-mock",
+      "version": "1.0.0"
+    },
+    "tools": [
+      {
+        "name": "get_runbook_notes",
+        "description": "Return notes for a matched runbook (mocked)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "document_id": {
+              "type": "string"
+            }
+          },
+          "required": ["document_id"]
+        },
+        "result": "Runbook notes for document (mocked): follow the MFA reset procedure."
+      }
+    ]
   }
 }

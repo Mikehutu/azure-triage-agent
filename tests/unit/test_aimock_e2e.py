@@ -1,50 +1,10 @@
 """End-to-end classification test against a real aimock server (offline, keyless)."""
 
-import shutil
-import socket
-import subprocess
-import time
-from collections.abc import Iterator
-from pathlib import Path
-
 import pytest
 from openai import AzureOpenAI
 
 from src.schemas import TicketPayload
 from src.services.triage_service import AzureOpenAITriageService, TriageServiceError
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-pytestmark = pytest.mark.skipif(not shutil.which("aimock"), reason="aimock not installed")
-
-
-@pytest.fixture(scope="module")
-def aimock_port() -> Iterator[int]:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        port = s.getsockname()[1]
-    proc = subprocess.Popen(
-        ["aimock", "-c", "aimock/aimock.json", "-p", str(port)],
-        cwd=PROJECT_ROOT,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    deadline = time.time() + 15
-    while time.time() < deadline:
-        try:
-            with socket.create_connection(("127.0.0.1", port), timeout=0.5):
-                break
-        except OSError:
-            time.sleep(0.2)
-    else:
-        proc.terminate()
-        pytest.skip("aimock server did not become ready")
-    yield port
-    proc.terminate()
-    try:
-        proc.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        proc.kill()
 
 
 def _client(port: int) -> AzureOpenAI:

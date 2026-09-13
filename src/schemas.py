@@ -22,10 +22,10 @@ class TicketPayload(BaseModel):
 
     model_config = {"extra": "forbid"}
 
-    ticket_id: str = Field(min_length=1)
+    ticket_id: str = Field(min_length=1, max_length=64)
     customer_tier: CustomerTier = Field(description="STANDARD, PREMIUM, or ENTERPRISE")
-    subject: str = Field(min_length=1)
-    body: str = Field(min_length=1)
+    subject: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=20_000)
 
     @field_validator("subject", "body")
     @classmethod

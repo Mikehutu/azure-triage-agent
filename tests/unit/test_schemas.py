@@ -58,3 +58,13 @@ def test_whitespace_only_body_rejected() -> None:
 def test_whitespace_only_subject_rejected() -> None:
     with pytest.raises(ValidationError):
         TicketPayload.model_validate({**VALID, "subject": "   "})
+
+
+def test_oversized_body_rejected() -> None:
+    with pytest.raises(ValidationError):
+        TicketPayload.model_validate({**VALID, "body": "x" * 20_001})
+
+
+def test_oversized_ticket_id_rejected() -> None:
+    with pytest.raises(ValidationError):
+        TicketPayload.model_validate({**VALID, "ticket_id": "T" * 65})
