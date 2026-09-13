@@ -1,0 +1,184 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.47.16.16243",
+      "templateHash": "10134328067462949519"
+    },
+    "description": "Azure Container Apps deployment for azure-triage-agent.\nZero plaintext secrets: all cloud auth via user-assigned managed identity + RBAC\n(Azure OpenAI User, Search Index Data Reader). Env vars carry names/endpoints only.\n"
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "triage-env",
+      "metadata": {
+        "description": "Container Apps managed environment name"
+      }
+    },
+    "containerAppName": {
+      "type": "string",
+      "defaultValue": "azure-triage-agent",
+      "metadata": {
+        "description": "Container App name"
+      }
+    },
+    "containerImage": {
+      "type": "string",
+      "metadata": {
+        "description": "Container image (registry/repo/image:tag)"
+      }
+    },
+    "openAiAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure OpenAI account name (existing resource)"
+      }
+    },
+    "searchServiceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure AI Search service name (existing resource)"
+      }
+    },
+    "chatDeploymentName": {
+      "type": "string",
+      "defaultValue": "gpt-4o-mini",
+      "metadata": {
+        "description": "OpenAI chat deployment name"
+      }
+    }
+  },
+  "variables": {
+    "roleOpenAiUser": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+    "roleSearchIndexDataReader": "1407120a-92aa-4202-b7e9-c0e197c71c8f"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[format('{0}-id', parameters('containerAppName'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "service": "azure-triage-agent"
+      }
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('environmentName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "service": "azure-triage-agent"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName'))), variables('roleOpenAiUser'), resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleOpenAiUser'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Search/searchServices', parameters('searchServiceName'))]",
+      "name": "[guid(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName'))), variables('roleSearchIndexDataReader'), resourceId('Microsoft.Search/searchServices', parameters('searchServiceName')))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleSearchIndexDataReader'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('containerAppName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName'))))]": {}
+        }
+      },
+      "tags": {
+        "service": "azure-triage-agent"
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8000
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "azure-triage-agent",
+              "image": "[parameters('containerImage')]",
+              "env": [
+                {
+                  "name": "AZURE_TRIAGE_AZURE_OPENAI_ENDPOINT",
+                  "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), '2023-05-01').endpoint]"
+                },
+                {
+                  "name": "AZURE_TRIAGE_AZURE_OPENAI_CHAT_DEPLOYMENT",
+                  "value": "[parameters('chatDeploymentName')]"
+                },
+                {
+                  "name": "AZURE_TRIAGE_AZURE_SEARCH_SERVICE_ENDPOINT",
+                  "value": "[format('https://{0}.search.windows.net', parameters('searchServiceName'))]"
+                },
+                {
+                  "name": "AZURE_TRIAGE_AZURE_SEARCH_INDEX_NAME",
+                  "value": "kb-runbooks-index"
+                }
+              ],
+              "resources": {
+                "cpu": 1,
+                "memory": "1.0Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": 0,
+            "maxReplicas": 3
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName')))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "endpoint": {
+      "type": "string",
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.App/containerApps', parameters('containerAppName')), '2023-05-01').configuration.ingress.fqdn)]"
+    },
+    "managedIdentityClientId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-id', parameters('containerAppName'))), '2023-01-31').clientId]"
+    }
+  }
+}

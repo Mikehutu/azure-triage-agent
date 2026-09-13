@@ -149,13 +149,13 @@ One vertical slice at a time; verify; report; do not batch unless asked.
 
 <!-- Agents: do not delete this heading. -->
 
-| Item | Value |
+|| Item | Value |
 |---|---|
-| Domain | azure-triage-agent |
-| Primary stack / validate commands | |
-| Product skills (in-repo) | `skills/` if present |
-| Extra CRITICAL risks | |
-| Official sources index | `kb/SOURCES.md` if used |
+|| Domain | Enterprise support ticket triage & enrichment agent (Azure) |
+|| Primary stack / validate commands | Python 3.11 + FastAPI + Pydantic v2 + azure-identity/openai/search SDKs; `uv sync`; gates: `ruff check . && ruff format --check .` (G1), `mypy src/ --strict` (G2), `bicep build --file infra/main.bicep` (G3), `pytest tests/unit/ -v` (G4, >=85% cov), e2e API test (G5) |
+|| Product skills (in-repo) | `skills/` (empty until needed) |
+|| Extra CRITICAL risks | NO real Azure creds/tenant here — all external surfaces mocked (aimock + client mocks); managed-identity-only auth, zero plaintext secrets (grep gate); validator=agy isolated from builder |
+|| Official sources index | `kb/SOURCES.md` (Azure docs references) |
 
 ## User Preferences
 
