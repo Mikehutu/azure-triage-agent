@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+#
+# sdd-validate — mechanical validation gate for an SDD project.
+#
+# Detects lint/test commands, runs them, writes docs/validation/latest.md
+# scaffold with recorded results. Does NOT claim AC satisfaction — that
+# remains a validator judgment against written criteria (see
+# docs/evidence-and-approval.md in the kit).
+#
+# Usage:
+#   sdd-validate [project-dir]
+#
+# Exit: 0 if all detected mechanical gates pass; 1 if any fail; 2 on usage error.
+#
+set -euo pipefail
+
+ROOT="${1:-.}"
+ROOT="$(cd "$ROOT" && pwd)"
+cd "$ROOT"
+
+mkdir -p docs/validation
+REPORT="docs/validation/latest.md"
+STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date +%Y-%m-%dT%H:%M:%S)"
+OVERALL=0
+
+run_gate() {
+  local name="$1"
+  shift
+  local cmd="$*"
+  local log
+  log="$(mktemp)"
+  set +e
+  # shellcheck disable=SC2086
+  eval "$cmd" >"$log" 2>&1
+  local ec=$?
+  set -e
+  local summary
+  summary="$(tail -n 5 "$log" | tr '\n' ' ' | cut -c1-200)"
+  if [[ "$ec" -eq 0 ]]; then
+    echo "| $name | \`$cmd\` | $ec | PASS — $summary |" >>"$REPORT"
+  else
+    echo "| $name | \`$cmd\` | $ec | FAIL — $summary |" >>"$REPORT"
+    OVERALL=1
+  fi
+  rm -f "$log"
+}
+
+{
+  echo "# Validation report (mechanical) — $STAMP"
+  echo
+  echo "Project: \`$ROOT\`"
+  echo
+  echo "This file is **evidence of commands run**, not proof that acceptance criteria are met."
+  echo "Map results to AC in a full report (see kit template \`templates/docs/VALIDATION-REPORT.md\`)."
+  echo
+  echo "## Mechanical gates"
+  echo
+  echo "| Gate | Command | Exit | Summary |"
+  echo "|---|---|---|---|"
+} >"$REPORT"
+
+# Detect gates
+if [[ -f pyproject.toml ]] || [[ -f pytest.ini ]] || [[ -d tests ]]; then
+  if command -v ruff >/dev/null 2>&1; then
+    if [[ -d src ]]; then run_gate lint "ruff check src tests" || true
+    else run_gate lint "ruff check ." || true
+    fi
+  fi
+  if command -v pytest >/dev/null 2>&1; then
+    run_gate tests "pytest -q" || true
+  elif [[ -x .venv/bin/pytest ]]; then
+    run_gate tests ".venv/bin/pytest -q" || true
+  fi
+fi
+
+if [[ -f package.json ]] && command -v npm >/dev/null 2>&1; then
+  if grep -q '"lint"' package.json 2>/dev/null; then run_gate lint "npm run lint" || true; fi
+  if grep -q '"test"' package.json 2>/dev/null; then run_gate tests "npm test" || true; fi
+fi
+
+if [[ -f Cargo.toml ]] && command -v cargo >/dev/null 2>&1; then
+  run_gate lint "cargo clippy --quiet" || true
+  run_gate tests "cargo test --quiet" || true
+fi
+
+if [[ -f go.mod ]] && command -v go >/dev/null 2>&1; then
+  run_gate lint "go vet ./..." || true
+  run_gate tests "go test ./..." || true
+fi
+
+if [[ -f Makefile ]] && grep -qE '^test:' Makefile; then
+  run_gate make-test "make test" || true
+fi
+
+# DOX structural gate (official agent0ai/dox hierarchy)
+DOX_CHECK=""
+if [[ -x "$ROOT/scripts/sdd-dox-check" ]]; then
+  DOX_CHECK="$ROOT/scripts/sdd-dox-check"
+elif [[ -x "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sdd-dox-check" ]]; then
+  DOX_CHECK="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sdd-dox-check"
+fi
+if [[ -n "$DOX_CHECK" ]]; then
+  run_gate dox "\"$DOX_CHECK\" \"$ROOT\"" || true
+elif [[ -f "$ROOT/AGENTS.md" ]]; then
+  # Minimal inline check if helper missing
+  if grep -qF "# DOX framework" "$ROOT/AGENTS.md" && grep -qF "## Core Contract" "$ROOT/AGENTS.md"; then
+    echo "| dox | inline heading check | 0 | PASS — DOX headings present |" >>"$REPORT"
+  else
+    echo "| dox | inline heading check | 1 | FAIL — root AGENTS.md missing official DOX contract |" >>"$REPORT"
+    OVERALL=1
+  fi
+fi
+
+# Surface TASKS validate section if present
+if [[ -f TASKS.md ]]; then
+  {
+    echo
+    echo "## TASKS.md Validate sections (for human/validator mapping)"
+    echo
+    echo '```'
+    grep -A6 -E '^#### Validate|Validate \(' TASKS.md 2>/dev/null | head -n 80 || echo "(no Validate sections found)"
+    echo '```'
+  } >>"$REPORT"
+fi
+
+{
+  echo
+  echo "## Acceptance criteria"
+  echo
+  echo "_Not auto-filled. Validator must map mechanical results + behaviour checks to written AC._"
+  echo
+  echo "## Overall mechanical"
+  if [[ "$OVERALL" -eq 0 ]]; then
+    echo "**MECH_PASS** — all detected commands exited 0."
+  else
+    echo "**MECH_FAIL** — one or more commands failed."
+  fi
+  echo
+  echo "Full AC verdict requires evidence-and-approval process (kit \`docs/evidence-and-approval.md\`)."
+} >>"$REPORT"
+
+echo "Wrote $ROOT/$REPORT"
+if [[ "$OVERALL" -eq 0 ]]; then
+  echo "MECH_PASS"
+else
+  echo "MECH_FAIL"
+fi
+exit "$OVERALL"

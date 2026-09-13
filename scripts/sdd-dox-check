@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+#
+# sdd-dox-check — structural integrity for official DOX (agent0ai/dox).
+#
+# Verifies:
+#   1. Root AGENTS.md installs the DOX contract (required headings)
+#   2. Paths listed in Child DOX Index that look like dir/AGENTS.md exist
+#   3. Present child AGENTS.md files contain Child Doc Shape sections
+#
+# Usage:
+#   sdd-dox-check [project-dir]
+#
+# Exit: 0 pass, 1 fail, 2 usage/IO error
+#
+set -euo pipefail
+
+ROOT="${1:-.}"
+if [[ ! -d "$ROOT" ]]; then
+  echo "Error: not a directory: $ROOT" >&2
+  exit 2
+fi
+ROOT="$(cd "$ROOT" && pwd)"
+AGENTS="$ROOT/AGENTS.md"
+FAIL=0
+
+say() { printf '%s\n' "$*"; }
+fail() { say "FAIL: $*"; FAIL=1; }
+pass() { say "PASS: $*"; }
+
+if [[ ! -f "$AGENTS" ]]; then
+  echo "Error: missing $AGENTS" >&2
+  exit 2
+fi
+
+say "DOX check: $ROOT"
+
+# Required official DOX headings (agent0ai/dox AGENTS.md)
+required=(
+  "# DOX framework"
+  "## Core Contract"
+  "## Read Before Editing"
+  "## Update After Editing"
+  "## Hierarchy"
+  "## Child Doc Shape"
+  "## Style"
+  "## Closeout"
+  "## Child DOX Index"
+)
+
+for h in "${required[@]}"; do
+  if grep -qF "$h" "$AGENTS"; then
+    pass "root has $h"
+  else
+    fail "root AGENTS.md missing required heading: $h"
+  fi
+done
+
+# Child Doc Shape section names must appear in root (teaches the shape)
+for sec in Purpose Ownership "Local Contracts" "Work Guidance" Verification; do
+  if grep -qF -- "- $sec" "$AGENTS" || grep -qF "## $sec" "$AGENTS"; then
+    :
+  else
+    # Shape is listed as bullets under Child Doc Shape in official file
+    if ! grep -A20 "## Child Doc Shape" "$AGENTS" | grep -qF "$sec"; then
+      fail "root AGENTS.md Child Doc Shape missing '$sec'"
+    fi
+  fi
+done
+
+# Extract child AGENTS.md paths from index tables/bullets: `path/AGENTS.md` or path/AGENTS.md
+mapfile -t CHILDREN < <(grep -oE '`?([A-Za-z0-9._/-]+/AGENTS\.md)`?' "$AGENTS" \
+  | tr -d '`' | sed 's|^\./||' | sort -u || true)
+
+if [[ "${#CHILDREN[@]}" -eq 0 ]]; then
+  say "INFO: no child AGENTS.md paths referenced in root index (allowed for tiny repos)"
+else
+  for rel in "${CHILDREN[@]}"; do
+    # skip vendor templates mentioning patterns
+    if [[ "$rel" == *"*"* ]]; then
+      continue
+    fi
+    if [[ -f "$ROOT/$rel" ]]; then
+      pass "indexed child exists: $rel"
+      # Child Doc Shape sections
+      for h in "## Purpose" "## Ownership" "## Local Contracts" "## Work Guidance" "## Verification" "## Child DOX Index"; do
+        if ! grep -qF "$h" "$ROOT/$rel"; then
+          fail "$rel missing section $h"
+        fi
+      done
+    else
+      fail "indexed child missing on disk: $rel"
+    fi
+  done
+fi
+
+# Orphan warning: AGENTS.md files not mentioned in root (informational)
+while IFS= read -r -d '' f; do
+  rel="${f#"$ROOT"/}"
+  [[ "$rel" == "AGENTS.md" ]] && continue
+  # Upstream vendored snapshots often named AGENTS.md — not DOX children
+  if [[ "$rel" == vendor/*/AGENTS.md ]]; then
+    continue
+  fi
+  if ! grep -qF "$rel" "$AGENTS"; then
+    say "WARN: AGENTS.md not referenced in root Child DOX Index: $rel"
+  fi
+done < <(find "$ROOT" -type f -name AGENTS.md -print0 2>/dev/null)
+
+if [[ "$FAIL" -ne 0 ]]; then
+  say "DOX_FAIL"
+  exit 1
+fi
+say "DOX_PASS"
+exit 0
