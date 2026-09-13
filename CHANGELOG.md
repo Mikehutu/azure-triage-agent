@@ -3,6 +3,8 @@
 > **Rule: never erase old entries.** Always append at the top with the date.
 
 ## v0.1.0 (2026-09-13)
+- [closeout][docs]: final docs pass — README rewritten (status/evidence table, architecture, mocking map, validation evidence index, offline quickstart), `kb/SOURCES.md` filled (RBAC GUIDs, Azure OpenAI structured outputs, SDK, aimock, sdd-kit)
+- [closeout]: project COMPLETE — 3/3 slices agy-validated (1×PASS-WITH-CONCERNS→fixed, 2×PASS); 47 tests/100% cov; DONE per PRD Success Criteria (mock-verified; real-Azure validation = future slice with tenant)
 - [scaffold]: SDD+DOX bootstrap via sdd-kit (doc tree, AGENTS.md chain, scripts/sdd-validate, sdd-dox-check, kb/)
 - [spec]: PRD.md authored — enterprise ticket triage & enrichment agent (Azure OpenAI classification + Azure AI Search RAG, managed-identity-only, <3s e2e)
 - [spec]: TASKS.md sliced R-PIV (3 slices) — validator = agy (isolated); builder = project session
