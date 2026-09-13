@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.47.16.16243",
-      "templateHash": "10134328067462949519"
+      "templateHash": "9528498406860365425"
     },
     "description": "Azure Container Apps deployment for azure-triage-agent.\nZero plaintext secrets: all cloud auth via user-assigned managed identity + RBAC\n(Azure OpenAI User, Search Index Data Reader). Env vars carry names/endpoints only.\n"
   },
@@ -154,7 +154,7 @@
                 }
               ],
               "resources": {
-                "cpu": 1,
+                "cpu": "[json('0.5')]",
                 "memory": "1.0Gi"
               }
             }

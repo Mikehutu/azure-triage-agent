@@ -23,10 +23,16 @@ Date: 2026-09-13 · Builder: project session (Hermes) · Validator: agy (separat
 
 ## Known deviations / notes (validator should confirm)
 
-1. **Container CPU: PRD says 0.5 cores, Bicep declares `cpu: 1`.** `Microsoft.App/containerApps@2023-05-01` type schema types `cpu` as `int | null`; `0.5` fails type check (BCP036) and even produces parse errors. Clean zero-warning build requires an integer. Mitigation: deploy-time override or newer API schema when available. Tracked in `docs/issues/` if it stays.
+1. **Container CPU (RESOLVED):** PRD says 0.5 cores. Initial `cpu: 1` (2023-05-01 schema types cpu as int) flagged by agy as F-01 (pairing risk with 1.0Gi). Fixed via `cpu: json('0.5')` — zero Bicep warnings, ARM float, correct 0.5 vCPU / 1.0Gi pairing. Verified by agy probe + re-run gates.
 2. **Standalone `bicep` CLI replaces `az bicep`** locally (no `az` on this machine, no sudo). `bicep build infra/main.bicep` == `az bicep build --file infra/main.bicep` semantics; CI can use the az form.
 3. **`sdd-validate` must run with venv on PATH** (`PATH="$PWD/.venv/bin:$PATH" ./scripts/sdd-validate .`) — the kit script prefers global pytest, which lacks pytest-cov. Documented in HANDOFF.
 4. **Slice 01 interim behavior:** valid payloads return 501 until service wiring (slice 02/03) — intentional fail-loud, no fake triage results. AC-3 covers 422 only; AC-FR-2 (200 + TriageResult) lands in slices 02–03.
+
+## Validator findings (agy, PASS-WITH-CONCERNS) — resolution log
+- F-01 MINOR (bicep cpu/memory pairing) → **FIXED** (json('0.5')), re-validated.
+- F-02 MINOR (whitespace-only body passes min_length=1) → queued in Slice 02 (schema pattern `\S`).
+- F-03 INFO (unbounded field lengths) → queued in Slice 03 (max_length / payload ceilings).
+- F-04 INFO (interim 501) → accepted by design, per PRD FR-1 staging.
 
 ## Residual risk (human ship approval scope)
 - Real Azure OpenAI/Search behavior is untested (no creds by design) — slices 02/03 replace mocks with aimock-recorded fixtures; real-cloud validation is a separate later gate.

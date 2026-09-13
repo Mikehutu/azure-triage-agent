@@ -119,9 +119,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             }
           ]
           resources: {
-            // 2023-05-01 type schema requires an integer core count; fractional
-            // CPU (PRD: 0.5) needs the newer schema — see docs/validation note.
-            cpu: 1
+            // 0.5 vCPU / 1.0Gi = valid Container Apps pairing; json('0.5')
+            // keeps fractional CPU with zero Bicep warnings (validated 2026-09-13).
+            cpu: json('0.5')
             memory: '1.0Gi'
           }
         }

@@ -27,12 +27,12 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 - [x] G2: `mypy src/ --strict` → exit 0
 - [x] G3: `bicep build --file infra/main.bicep` → compiles clean ARM-JSON, zero warnings
 - [x] Schema unit tests (422 on invalid payload; tier enum enforced) pass
-- [ ] agy AC verification (fresh context) → `docs/validation/slice-01.md`
+- [x] agy AC verification (fresh context) → `docs/validation/slice-01.md` (PASS-WITH-CONCERNS, F-01 fixed, F-02/F-03 queued)
 
 **Module Checkpoint:**
-- [ ] All tests pass
-- [ ] Zero plaintext secrets (grep for keys/tokens)
-- [ ] Cross-agent validation passed (agy)
+- [x] All tests pass
+- [x] Zero plaintext secrets (grep for keys/tokens)
+- [x] Cross-agent validation passed (agy)
 
 ---
 
@@ -43,6 +43,7 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 #### Plan (Agent: builder)
 - [ ] AC: `ITriageService.classify` returns `category` ∈ {Billing, Authentication, Infrastructure, Product Defect}, `severity` ∈ {P1_CRITICAL..P4_LOW}
 - [ ] AC: uses Azure OpenAI structured outputs (temperature 0.0) via `DefaultAzureCredential`; raises on failure (no bare except, no silent fallback)
+- [ ] AC (agy F-02): whitespace-only body rejected — add pattern `\S` to body/subject fields
 - [ ] AC: unit tests mock the Azure OpenAI client; aimock fixtures cover success + throttling + malformed-response edge cases
 - [ ] Define test fixtures (`tests/fixtures/`) incl. standard + critical tickets
 
@@ -72,6 +73,7 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 - [ ] AC: `ISearchService.search_runbooks(query, top=2)` returns up to 2 `RunbookReference` (id, title, relevance_score); empty list on no match
 - [ ] AC: hybrid search against `kb-runbooks-index` (Azure AI Search SDK); failures surface, no silent fallback
 - [ ] AC: `POST /api/v1/triage` end-to-end enriches in < 3s (G5) — measured against mocked search + LLM
+- [ ] AC (agy F-03): unbounded fields — `max_length` on ticket_id/subject/body + API payload ceiling
 - [ ] Edge cases: empty runbook match, search index unavailable, degraded suggestion, oversized payload
 
 #### Implement (Agent: builder)
