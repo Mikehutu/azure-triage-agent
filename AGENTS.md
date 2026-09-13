@@ -163,14 +163,15 @@ When the user requests a durable behavior change, record it here or in the relev
 
 ## Child DOX Index
 
-| Path | Owns |
+|| Path | Owns |
 |---|---|
-| `docs/AGENTS.md` | Docs, plans, issues, validation, handoff |
-| `kb/AGENTS.md` | Official-doc grounding corpus |
-| `scripts/AGENTS.md` | Local automation / validate |
-| `src/AGENTS.md` | Implementation |
-| `tests/AGENTS.md` | Automated tests |
-| `skills/AGENTS.md` | In-repo product/domain skills |
+|| `docs/AGENTS.md` | Docs, plans, issues, validation, handoff |
+|| `kb/AGENTS.md` | Official-doc grounding corpus |
+|| `scripts/AGENTS.md` | Local automation / validate |
+|| `src/AGENTS.md` | Implementation |
+|| `tests/AGENTS.md` | Automated tests |
+|| `skills/AGENTS.md` | In-repo product/domain skills |
+|| `aimock/AGENTS.md` | Mock harness — offline agentic-surface fixtures (never a runtime dep) |
 
 Root-owned: `PRD.md`, `TASKS.md`, `CHANGELOG.md`, `PLANNING.md`, `INFRASTRUCTURE.md`, `README.md`, `CLAUDE.md`, root `AGENTS.md`.
 

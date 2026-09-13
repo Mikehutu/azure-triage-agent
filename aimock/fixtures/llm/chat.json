@@ -1,0 +1,41 @@
+{
+  "fixtures": [
+    {
+      "match": {
+        "userMessage": "throttle test",
+        "model": "gpt-4o-mini"
+      },
+      "response": {
+        "error": {
+          "status": 429,
+          "message": "Rate limit exceeded — mocked throttling"
+        }
+      }
+    },
+    {
+      "match": {
+        "userMessage": "billing invoice",
+        "model": "gpt-4o-mini"
+      },
+      "response": {
+        "content": "{\"ticket_id\": \"T-8001\", \"category\": \"Billing\", \"severity\": \"P2_HIGH\", \"summary\": \"Invoice mismatch\", \"suggested_action\": \"Reconcile invoice against contract price\", \"matched_runbooks\": []}"
+      },
+      "latency": 30
+    },
+    {
+      "match": {
+        "userMessage": "mfa outage",
+        "model": "gpt-4o-mini"
+      },
+      "response": {
+        "content": "{\"ticket_id\": \"T-8002\", \"category\": \"Authentication\", \"severity\": \"P1_CRITICAL\", \"summary\": \"MFA outage\", \"suggested_action\": \"Escalate to identity team\", \"matched_runbooks\": []}"
+      }
+    },
+    {
+      "match": {},
+      "response": {
+        "content": "{\"ticket_id\": \"T-9999\", \"category\": \"Product Defect\", \"severity\": \"P3_MEDIUM\", \"summary\": \"Generic fallback\", \"suggested_action\": \"Review and adjust\", \"matched_runbooks\": []}"
+      }
+    }
+  ]
+}

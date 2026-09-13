@@ -1,11 +1,12 @@
 """Pydantic schemas for the enterprise ticket triage API.
 
-Enterprise rails: Literal-constrained enums, no secrets, extra fields forbidden.
+Enterprise rails: Literal-constrained enums, no secrets, extra fields forbidden,
+non-blank text fields (agy F-02).
 """
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 CustomerTier = Literal["STANDARD", "PREMIUM", "ENTERPRISE"]
 Category = Literal["Billing", "Authentication", "Infrastructure", "Product Defect"]
@@ -25,6 +26,14 @@ class TicketPayload(BaseModel):
     customer_tier: CustomerTier = Field(description="STANDARD, PREMIUM, or ENTERPRISE")
     subject: str = Field(min_length=1)
     body: str = Field(min_length=1)
+
+    @field_validator("subject", "body")
+    @classmethod
+    def _reject_blank(cls, value: str) -> str:
+        """Reject whitespace-only strings (agy F-02, 2026-09-13)."""
+        if not value.strip():
+            raise ValueError("must contain non-whitespace characters")
+        return value
 
 
 class RunbookReference(BaseModel):

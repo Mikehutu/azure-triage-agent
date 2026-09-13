@@ -24,7 +24,12 @@ uv run pytest tests/unit/ -v || fail "G4 pytest"
 echo "G4_PASS"
 
 echo "== SECRETS scan (assignment patterns only) =="
-if grep -rniE "(api[_-]?key|access[_-]?key|secret|password|token)[[:space:]]*=[[:space:]]*[\"'][^\"']+" src/ ; then
+# Known, documented exception: api_key="mock" — dummy key for the OFFLINE aimock
+# client only (_build_mock_client, src/services/__init__.py). Never reaches a
+# real provider. Anything else that looks like a hardcoded secret fails.
+HITS=$(grep -rniE "(api[_-]?key|access[_-]?key|secret|password|token)[[:space:]]*=[[:space:]]*[\"'][^\"']+" src/ | grep -v 'api_key="mock"')
+if [[ -n "$HITS" ]]; then
+  echo "$HITS"
   fail "hardcoded secret assignment found"
 fi
 echo "SECRETS_CLEAN"

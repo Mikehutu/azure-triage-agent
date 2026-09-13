@@ -48,3 +48,13 @@ def test_empty_subject_rejected() -> None:
 def test_extra_field_rejected() -> None:
     with pytest.raises(ValidationError):
         TicketPayload.model_validate({**VALID, "unexpected": "x"})
+
+
+def test_whitespace_only_body_rejected() -> None:
+    with pytest.raises(ValidationError):
+        TicketPayload.model_validate({**VALID, "body": "   \t\n  "})
+
+
+def test_whitespace_only_subject_rejected() -> None:
+    with pytest.raises(ValidationError):
+        TicketPayload.model_validate({**VALID, "subject": "   "})

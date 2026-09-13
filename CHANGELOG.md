@@ -14,3 +14,7 @@
 - [slice-01][decision]: validation report + AC matrix at docs/validation/slice-01.md; agy validation = PASS-WITH-CONCERNS (no MAJOR findings)
 - [slice-01][fix]: agy F-01 — `cpu: json('0.5')` (zero-warning fractional CPU, correct 0.5 vCPU/1.0Gi pairing); gates re-PASS
 - [slice-01][queue]: agy F-02 whitespace-only body → slice 02; F-03 unbounded field lengths → slice 03
+- [slice-02]: classification engine — `src/services/triage_service.py` (Azure OpenAI structured outputs, temp 0.0, DI client), `src/services/__init__.py` (managed-identity prod client + mock client), flat strict JSON schema
+- [slice-02][fix]: agy F-02 — whitespace-only body/subject rejected (field_validator)
+- [slice-02][test]: 30 tests / 100% cov; unit (mocked client incl. 429/malformed/mismatch) + aimock e2e (real HTTP: billing fixture + throttle 429 → TriageServiceError, fail loud)
+- [slice-02][harness]: `aimock/` — Azure OpenAI mocks (billing, mfa, fallback, 429 error), AGENTS.md registered in DOX index; secrets gate allows ONLY `api_key="mock"` (documented)

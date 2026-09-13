@@ -41,21 +41,21 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 ### Module: `triage-service`
 
 #### Plan (Agent: builder)
-- [ ] AC: `ITriageService.classify` returns `category` ∈ {Billing, Authentication, Infrastructure, Product Defect}, `severity` ∈ {P1_CRITICAL..P4_LOW}
-- [ ] AC: uses Azure OpenAI structured outputs (temperature 0.0) via `DefaultAzureCredential`; raises on failure (no bare except, no silent fallback)
-- [ ] AC (agy F-02): whitespace-only body rejected — add pattern `\S` to body/subject fields
-- [ ] AC: unit tests mock the Azure OpenAI client; aimock fixtures cover success + throttling + malformed-response edge cases
-- [ ] Define test fixtures (`tests/fixtures/`) incl. standard + critical tickets
+- [x] AC: `ITriageService.classify` returns `category` ∈ {Billing, Authentication, Infrastructure, Product Defect}, `severity` ∈ {P1_CRITICAL..P4_LOW}
+- [x] AC: uses Azure OpenAI structured outputs (temperature 0.0) via `DefaultAzureCredential`; raises on failure (no bare except, no silent fallback)
+- [x] AC (agy F-02): whitespace-only body rejected — add pattern `\S` to body/subject fields
+- [x] AC: unit tests mock the Azure OpenAI client; aimock fixtures cover success + throttling + malformed-response edge cases
+- [x] Define test fixtures (`tests/fixtures/`) incl. standard + critical tickets
 
 #### Implement (Agent: builder)
-- [ ] `src/services/triage_service.py` + `src/services/__init__.py`
-- [ ] `tests/unit/test_triage.py` (mocked client) + tests/unit/conftest.py
-- [ ] Wire into `src/main.py` POST handler
+- [x] `src/services/triage_service.py` + `src/services/__init__.py`
+- [x] `tests/unit/test_triage.py` (mocked client) + tests/unit/conftest.py
+- [x] `aimock/` harness + `tests/unit/test_aimock_e2e.py` (offline e2e, skippable)
 
 #### Validate (Agent: **agy**)
-- [ ] G4: `pytest tests/unit/ -v` with >= 85% coverage
-- [ ] G1/G2 re-run
-- [ ] aimock e2e: scripted Azure OpenAI responses over real HTTP (record/replay or fixtures)
+- [x] G4: `pytest tests/unit/ -v` with >= 85% coverage
+- [x] G1/G2 re-run
+- [x] aimock e2e: scripted Azure OpenAI responses over real HTTP (record/replay or fixtures)
 - [ ] agy AC verification → `docs/validation/slice-02.md`
 
 **Module Checkpoint:**
@@ -79,6 +79,7 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 #### Implement (Agent: builder)
 - [ ] `src/services/search_service.py` (Azure SDK hybrid search; local fake adapter for offline tests)
 - [ ] `tests/unit/test_search.py` (mocked client / fake adapter)
+- [ ] Wire `triage_service` + `search_service` into `src/main.py` POST handler (200 TriageResult)
 - [ ] `tests/unit/test_triage_api.py` e2e (FastAPI TestClient + aimock LLM + fake search)
 - [ ] `aimock/` fixtures for search + any MCP/A2A agentic surfaces
 

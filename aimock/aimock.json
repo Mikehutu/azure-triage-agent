@@ -1,0 +1,6 @@
+{
+  "llm": {
+    "provider": "azure",
+    "fixtures": "./aimock/fixtures/llm"
+  }
+}

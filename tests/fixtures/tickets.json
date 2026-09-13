@@ -1,0 +1,24 @@
+{
+  "standard": {
+    "ticket_id": "T-7001",
+    "customer_tier": "STANDARD",
+    "subject": "Cannot reset password after lockout",
+    "body": "User locked out of portal, self-service reset fails with generic error every attempt today."
+  },
+  "critical": {
+    "ticket_id": "T-7002",
+    "customer_tier": "ENTERPRISE",
+    "subject": "Billing portal down for all EU tenants",
+    "body": "Billing portal HTTP 503 for every EU tenant since 08:00 UTC. VIP customer on call. Blast radius is all ENTERPRISE accounts."
+  },
+  "expected": {
+    "standard": {
+      "category": "Authentication",
+      "severity": "P2_HIGH"
+    },
+    "critical": {
+      "category": "Infrastructure",
+      "severity": "P1_CRITICAL"
+    }
+  }
+}
