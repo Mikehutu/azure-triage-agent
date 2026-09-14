@@ -2,6 +2,12 @@
 
 > **Rule: never erase old entries.** Always append at the top with the date.
 
+## v0.3.0 (2026-09-14)
+- [docs][architecture]: Documented enterprise client integration patterns (ServiceNow, Zendesk, Jira Service Management) via Azure Logic Apps, Power Automate, and native webhooks.
+- [docs][ui]: Added Tier-1 Support Engineer Dashboard Copilot Card visualization and field mapping specifications.
+- [specs]: Added Phase 5 (Slice 05) continuity roadmap for CRM middleware and connectors across `PRD.md`, `PLANNING.md`, `TASKS.md`, and `docs/HANDOFF.md`.
+- [release]: Public repository publication via GitHub CLI.
+
 ## v0.2.0 (2026-09-14)
 - [docs][readme]: Professional README overhaul — eliminated internal building jargon (sdd-kit, agy-validated, R-PIV slices, clean-room reports), added enterprise architecture diagrams, Mermaid sequence flows, full API specification, configuration table, and Azure deployment guide.
 - [e2e][test]: Practical black-box end-to-end test suite (`tests/e2e/`) running against live `uvicorn` and `aimock` processes over real TCP sockets (ephemeral ports, zero internal dependency overrides).

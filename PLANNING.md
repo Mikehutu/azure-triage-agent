@@ -17,6 +17,10 @@ Dependencies: Phase 2.
 Live-server black-box tests (`tests/e2e/`) over TCP sockets (real uvicorn + aimock subprocesses), standalone runner `scripts/run-e2e.sh`, comprehensive `docs/TESTING.md`, and professional README overhaul. Gate G5 practical.
 Dependencies: Phase 3.
 
+## Phase 5 — Continuity & Enterprise CRM Middleware (Slice 05)
+Pre-built Azure Logic Apps and Power Automate connectors for ServiceNow, Zendesk, and Jira Service Management; bidirectional field mapping adapters for Tier-1 workspace copilot notes; optional Azure Service Bus async ingestion.
+Dependencies: Phase 4.
+
 ## Cross-cutting
 - Must-run gates (no later slice breaks them): G1 ruff, G2 mypy --strict, G3 bicep build.
 - Coverage floor 85% from slice 02 onward.

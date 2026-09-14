@@ -91,6 +91,67 @@ sequenceDiagram
 
 ---
 
+## Enterprise Client Integration & Tier-1 Workflow
+
+### Where the Payload Goes: The Tier-1 Support Experience
+
+In real enterprise client environments, support engineers do not monitor a disconnected dashboard. Support staff work within standard **IT Service Management (ITSM) or CRM systems**:
+- **ServiceNow** (*Service Operations Workspace / Agent Workspace*)
+- **Zendesk** (*Zendesk Agent Workspace*)
+- **Jira Service Management** (*Agent Queues & Incident Views*)
+- **Salesforce Service Cloud** (*Lightning Service Console*)
+
+`azure-triage-agent` functions as an automated intelligence layer between customer intake and the engineer's ticket queue:
+
+```
+1. Customer Submission        2. CRM / Helpdesk Ingestion   3. azure-triage-agent          4. Tier-1 Support Queue
+┌────────────────────┐       ┌──────────────────────────┐  ┌────────────────────┐         ┌─────────────────────────┐
+│ User submits issue │──────►│ ServiceNow/Zendesk/Jira  │─►│ POST /api/v1/triage│────────►│ Ticket auto-categorized │
+│ via portal, email, │       │ triggers webhook / Logic │  │ classifies & pulls │         │ with priority & private │
+│ or chat widget     │       │ App workflow on creation │  │ runbooks (<50ms)   │         │ AI Copilot work note    │
+└────────────────────┘       └──────────────────────────┘  └────────────────────┘         └─────────────────────────┘
+```
+
+### What the Tier-1 Engineer Sees (Internal Copilot Card)
+
+When a Tier-1 support engineer opens an assigned ticket, the category and SLA priority dropdowns are already configured, and an **Internal Private Work Note** (visible only to engineers, never to the customer) provides immediate resolution guidance:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ INCIDENT #41029: Invoice discrepancy on August renewal                           │
+│ Requester: Acme Corp (ENTERPRISE)  |  Status: Open                               │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ Category: [ Billing       ▼ ]  |  Priority: [ P2 - High  ▼ ] (Auto-triaged by AI)│
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ 🔒 INTERNAL AI COPILOT TRIAGE (Visible to staff only)                            │
+│                                                                                  │
+│ 📌 Summary:                                                                      │
+│ Customer inquiry regarding unexpected recurring seat charges in August invoice.  │
+│                                                                                  │
+│ ⚡ Suggested Action:                                                             │
+│ Reconcile line items against Enterprise Agreement Schedule B and issue prorated  │
+│ credit note if seats were downgraded prior to the 1st.                           │
+│                                                                                  │
+│ 📚 Recommended Internal Runbooks:                                                │
+│ 1. 🔗 [RB-102: Enterprise Billing & Invoicing Dispute Guide] (Score: 0.89)       │
+│ 2. 🔗 [RB-105: Subscription Seat Adjustment & Credit Workflow] (Score: 0.81)    │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ CUSTOMER MESSAGE:                                                                │
+│ "Hi support, our August invoice just arrived and we are being billed for 150     │
+│ seats instead of the 120 we agreed on during our renewal..."                     │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Supported Integration Patterns
+
+| Pattern | Mechanism | Best For |
+|---|---|---|
+| **Azure Logic Apps / Power Automate** *(Recommended)* | Low-code workflow listening to `When a ticket is created` in ServiceNow/Zendesk, calling `POST /api/v1/triage`, and updating the ticket record. | Enterprise standard: zero code changes in the CRM; separates CRM credentials from the triage agent. |
+| **Native CRM Webhooks / Business Rules** | Direct webhook triggered on ticket creation pointing to `https://<container-app-url>/api/v1/triage`. | Simple direct integration within Zendesk/Freshdesk automation triggers. |
+| **Event-Driven Asynchronous Pipeline** | Azure Service Bus or Event Hub consumer listening to incoming ticket events, enriching via triage, and posting updates. | High-throughput, asynchronous enterprise ingestion at scale. |
+
+---
+
 ## API Reference
 
 ### Health Check

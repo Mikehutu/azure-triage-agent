@@ -132,10 +132,24 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 
 ---
 
+## Phase 5 — Continuity & Enterprise CRM Middleware (Slice 05)
+
+### Module: `integrations` + CRM Connectors (Roadmap)
+
+#### Plan
+- [ ] Azure Logic App ARM/Bicep template connecting ServiceNow / Zendesk to `POST /api/v1/triage`.
+- [ ] Field-mapping specification for CRM internal work note copilot card (`summary`, `suggested_action`, `matched_runbooks`).
+- [ ] Webhook receiver template for direct CRM event triggers.
+- [ ] Asynchronous queue ingestion adapter (Azure Service Bus / Event Grid).
+
+---
+
 ## Done
 
 - [x] Phase 1 (Slice 01) — Core contract & Bicep
 - [x] Phase 2 (Slice 02) — Classification engine
 - [x] Phase 3 (Slice 03) — Runbook retrieval & pipeline
 - [x] Phase 4 (Slice 04) — Practical live E2E tests & test documentation
+- [ ] Phase 5 (Slice 05) — Enterprise CRM middleware & connectors (planned)
+
 

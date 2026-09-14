@@ -235,3 +235,8 @@ class TriageResult(BaseModel):
 - Provide offline mock support in `create_search_service` for standalone offline execution.
 - Author `docs/TESTING.md` and clean up `README.md` removing builder jargon.
 - **Pass all gates G1–G5 cleanly.**
+
+### Slice 05: Continuity & Enterprise CRM Middleware (Roadmap)
+- Provide Azure Logic Apps and Power Automate workflow templates to integrate with ServiceNow, Zendesk, and Jira Service Management.
+- Support bidirectional webhook field mapping (Category, Severity, and Private Work Note copilot card).
+- Define asynchronous queue ingestion templates using Azure Service Bus / Event Grid.
