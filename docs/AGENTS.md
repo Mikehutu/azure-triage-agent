@@ -14,6 +14,7 @@ Project documentation, plans, issues, validation reports, and multi-session hand
 | Path | Role |
 |---|---|
 | `HANDOFF.md` | Canonical multi-session handoff |
+| `TESTING.md` | Comprehensive testing architecture & operational guide |
 | `plans/` | Implementation plans (file-first) |
 | `issues/` | RCA / bug write-ups (file-first) |
 | `validation/` | Mechanical + AC validation evidence |

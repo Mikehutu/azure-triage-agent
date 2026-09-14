@@ -96,6 +96,46 @@ Mocking rule: no real Azure keys/tenant in this environment. All LLM/Search/agen
 
 ---
 
+## Phase 4 — Practical E2E Testing & Test Documentation (Slice 04)
+
+### Module: `tests/e2e` + `docs/TESTING.md`
+
+#### Plan
+- [x] AC: Black-box integration tests against live `uvicorn` and `aimock` processes over real TCP sockets (zero internal dependency overrides).
+- [x] AC: Scenarios cover `/healthz`, standard billing ticket, critical incident escalation (`P1_CRITICAL`), latency budget (<3.0s SLA), and concurrency.
+- [x] AC: Error and validation scenarios cover upstream rate-limiting (429 -> 502), unapproved tiers (422), whitespace inputs (422), extra injected fields (422), and oversized payloads (422).
+- [x] AC: Standalone runner `scripts/run-e2e.sh` and Gate 5 integrated into `scripts/run-gates.sh`.
+- [x] AC: Author comprehensive `docs/TESTING.md` and clean up `README.md` removing builder jargon.
+
+#### Implement
+- [x] `tests/e2e/conftest.py` with ephemeral port allocation and subprocess lifecycle.
+- [x] `tests/e2e/test_api_lifecycle.py` with core API workflows and latency checks.
+- [x] `tests/e2e/test_validation_and_failures.py` with validation and upstream provider failure checks.
+- [x] `src/services/__init__.py` mock search adapter support in `create_search_service`.
+- [x] `scripts/run-e2e.sh` executable test runner.
+- [x] `scripts/run-gates.sh` updated to run G1–G5.
+- [x] `docs/TESTING.md` comprehensive testing guide.
+- [x] `README.md` professional documentation overhaul.
+
+#### Validate
+- [x] G1: `ruff check . && ruff format --check .` → PASS
+- [x] G2: `mypy src/ --strict` → PASS (zero errors)
+- [x] G3: `bicep build infra/main.bicep` → PASS (zero warnings)
+- [x] G4: `pytest tests/unit/ -v` → PASS (49/49 tests, 100% line coverage)
+- [x] G5: `bash scripts/run-e2e.sh` → PASS (13/13 practical e2e tests)
+- [x] Secrets scan: `SECRETS_CLEAN`
+
+**Module Checkpoint:**
+- [x] All 62 tests pass across unit and live e2e suites
+- [x] 100% code coverage maintained
+- [x] All mechanical gates green (G1–G5)
+
+---
+
 ## Done
 
-(append as slices complete)
+- [x] Phase 1 (Slice 01) — Core contract & Bicep
+- [x] Phase 2 (Slice 02) — Classification engine
+- [x] Phase 3 (Slice 03) — Runbook retrieval & pipeline
+- [x] Phase 4 (Slice 04) — Practical live E2E tests & test documentation
+

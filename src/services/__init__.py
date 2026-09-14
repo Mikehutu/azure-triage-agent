@@ -11,8 +11,10 @@ from functools import lru_cache
 from openai import AzureOpenAI
 
 from src.config import Settings, get_settings
+from src.schemas import RunbookReference
 from src.services.search_service import (
     AzureAISearchService,
+    FakeSearchService,
     ISearchService,
     SearchServiceError,
 )
@@ -26,6 +28,7 @@ __all__ = [
     "AzureAISearchService",
     "AzureOpenAIClient",
     "AzureOpenAITriageService",
+    "FakeSearchService",
     "ISearchService",
     "ITriageService",
     "SearchServiceError",
@@ -76,8 +79,23 @@ def create_triage_service(settings: Settings | None = None) -> ITriageService:
 
 
 def create_search_service(settings: Settings | None = None) -> ISearchService:
-    """Build the Azure AI Search runbook retriever (managed identity auth)."""
+    """Build the Azure AI Search runbook retriever (managed identity auth or offline mock)."""
     settings = settings or get_settings()
+    if settings.mock:
+        return FakeSearchService(
+            [
+                RunbookReference(
+                    document_id="rb-101",
+                    title="Identity & Access Management Troubleshooting",
+                    relevance_score=0.95,
+                ),
+                RunbookReference(
+                    document_id="rb-102",
+                    title="Enterprise Billing & Invoicing Dispute Guide",
+                    relevance_score=0.88,
+                ),
+            ]
+        )
     from azure.identity import DefaultAzureCredential
     from azure.search.documents import SearchClient
 

@@ -1,15 +1,16 @@
 # HANDOFF — azure-triage-agent
 
-Last updated: 2026-09-13 (PROJECT COMPLETE — 3/3 slices, all agy-validated) · Next: optional GitHub publish (needs Mike YES) or real-Azure validation slice
+Last updated: 2026-09-14 (v0.2.0 — Slice 04 Delivered: Practical E2E Tests + Test Documentation + Clean README) · Next: optional GitHub publish or real-Azure validation slice
 
 ## Current State
 - SDD+DOX project at ~/projects/azure-triage-agent (local git; no GitHub repo — publish policy applies if ever shared).
-- **ALL SLICES DONE + agy-validated:**
+- **ALL 4 SLICES DELIVERED:**
   - Slice 01 (`0eed6cd`, `c6b505f`): schemas/config/main shell/bicep — agy PASS-WITH-CONCERNS; F-01 fixed.
   - Slice 02 (`6c525e2`, `5d84381`): classification engine — agy PASS; F-01 (choices guard) fixed.
-  - Slice 03 (`50c3772`, final close-out commit to come): search + full pipeline + MCP mocks — agy **PASS, ready per PRD Success Criteria**; F-01 dedup fixed.
-- Gates today: ALL_GATES_PASS (47 tests, 100% cov, `--cov-fail-under=85`), MECH_PASS, DOX_PASS (8 children).
-- PRD Success Criteria 1-5 satisfied against mocks; real Azure validation remains (no creds by design).
+  - Slice 03 (`50c3772`): search + full pipeline + MCP mocks — agy PASS; F-01 dedup fixed.
+  - Slice 04 (`v0.2.0`): practical live-server e2e tests (`tests/e2e/`), `FakeSearchService` mock support in `create_search_service`, standalone `scripts/run-e2e.sh`, G5 integration in `scripts/run-gates.sh`, comprehensive `docs/TESTING.md`, and professional README overhaul.
+- Gates today: ALL_GATES_PASS (62 tests total: 49 unit + 13 e2e, 100% cov, `--cov-fail-under=85`), MECH_PASS, DOX_PASS.
+- PRD Success Criteria 1-5 satisfied against live local server and offline mocks; real Azure validation remains (no creds by design).
 
 ## Environment Notes
 - WSL2 no sudo: bicep standalone; `az` absent (G3 = `bicep build`).

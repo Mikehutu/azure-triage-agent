@@ -2,6 +2,16 @@
 
 > **Rule: never erase old entries.** Always append at the top with the date.
 
+## v0.2.0 (2026-09-14)
+- [docs][readme]: Professional README overhaul — eliminated internal building jargon (sdd-kit, agy-validated, R-PIV slices, clean-room reports), added enterprise architecture diagrams, Mermaid sequence flows, full API specification, configuration table, and Azure deployment guide.
+- [e2e][test]: Practical black-box end-to-end test suite (`tests/e2e/`) running against live `uvicorn` and `aimock` processes over real TCP sockets (ephemeral ports, zero internal dependency overrides).
+- [e2e][scenarios]: Added tests for `/healthz`, standard billing triage, critical incident escalation (`P1_CRITICAL`), SLA latency budgets (<3.0s), and multi-threaded request concurrency.
+- [e2e][validation]: Added tests for upstream rate limiting (HTTP 429 -> HTTP 502 fail-loud), unapproved customer tiers (HTTP 422), whitespace inputs, missing fields, injected fields (`extra="forbid"`), and oversized payloads.
+- [services][mock]: Enabled `FakeSearchService` adapter in `src/services/__init__.py` (`create_search_service`) when `settings.mock=True`, enabling standalone local server execution offline without Azure Search credentials.
+- [tooling][scripts]: Added executable `scripts/run-e2e.sh` and updated `scripts/run-gates.sh` to include Gate 5 (`G5: practical e2e tests`) alongside G1–G4 and secret scanning.
+- [docs][testing]: Created comprehensive testing guide in `docs/TESTING.md`.
+- [specs]: Updated `PRD.md`, `TASKS.md`, `PLANNING.md`, `INFRASTRUCTURE.md`, `docs/HANDOFF.md`, and DOX contracts in `tests/AGENTS.md` and `docs/AGENTS.md`.
+
 ## v0.1.0 (2026-09-13)
 - [closeout][docs]: final docs pass — README rewritten (status/evidence table, architecture, mocking map, validation evidence index, offline quickstart), `kb/SOURCES.md` filled (RBAC GUIDs, Azure OpenAI structured outputs, SDK, aimock, sdd-kit)
 - [closeout]: project COMPLETE — 3/3 slices agy-validated (1×PASS-WITH-CONCERNS→fixed, 2×PASS); 47 tests/100% cov; DONE per PRD Success Criteria (mock-verified; real-Azure validation = future slice with tenant)

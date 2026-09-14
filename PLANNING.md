@@ -13,6 +13,10 @@ Dependencies: Phase 1 (schemas/config).
 `ISearchService` (Azure AI Search hybrid), wire into `POST /api/v1/triage`, e2e tests with aimock + fake search. Gate G5.
 Dependencies: Phase 2.
 
+## Phase 4 — Practical E2E Testing & Test Documentation (Slice 04)
+Live-server black-box tests (`tests/e2e/`) over TCP sockets (real uvicorn + aimock subprocesses), standalone runner `scripts/run-e2e.sh`, comprehensive `docs/TESTING.md`, and professional README overhaul. Gate G5 practical.
+Dependencies: Phase 3.
+
 ## Cross-cutting
 - Must-run gates (no later slice breaks them): G1 ruff, G2 mypy --strict, G3 bicep build.
 - Coverage floor 85% from slice 02 onward.

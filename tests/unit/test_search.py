@@ -110,3 +110,34 @@ def test_fake_search_service_deterministic() -> None:
 def test_fake_non_positive_top_raises() -> None:
     with pytest.raises(SearchServiceError):
         FakeSearchService().search_runbooks("q", top=-1)
+
+
+def test_create_search_service_mock_branch() -> None:
+    from src.config import Settings
+    from src.services import create_search_service
+
+    service = create_search_service(Settings(mock=True))
+    assert isinstance(service, FakeSearchService)
+    refs = service.search_runbooks("test query", top=2)
+    assert len(refs) == 2
+    assert refs[0].document_id == "rb-101"
+
+
+def test_create_search_service_managed_identity_branch(monkeypatch: pytest.MonkeyPatch) -> None:
+    from src.config import Settings
+    from src.services import create_search_service
+
+    captured: dict[str, Any] = {}
+
+    class FakeSearchClient:
+        def __init__(self, **kwargs: Any) -> None:
+            captured.update(kwargs)
+
+    import azure.search.documents
+
+    monkeypatch.setattr(azure.search.documents, "SearchClient", FakeSearchClient)
+    service = create_search_service(Settings(mock=False))
+    assert isinstance(service, AzureAISearchService)
+    assert captured["endpoint"] == "https://placeholder.search.windows.net"
+    assert captured["index_name"] == "kb-runbooks-index"
+    assert "credential" in captured

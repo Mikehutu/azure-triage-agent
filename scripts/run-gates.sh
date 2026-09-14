@@ -23,6 +23,10 @@ echo "== G4: pytest + coverage =="
 uv run pytest tests/unit/ -v || fail "G4 pytest"
 echo "G4_PASS"
 
+echo "== G5: practical e2e tests =="
+bash scripts/run-e2e.sh || fail "G5 e2e"
+echo "G5_PASS"
+
 echo "== SECRETS scan (assignment patterns only) =="
 # Known, documented exception: api_key="mock" — dummy key for the OFFLINE aimock
 # client only (_build_mock_client, src/services/__init__.py). Never reaches a
